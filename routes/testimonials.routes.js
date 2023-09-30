@@ -15,7 +15,11 @@ router.route('/testimonials/random').get((req, res) => {
 
 router.route('/testimonials/:id').get((req, res) => {
   const elementToReturn = db.testimonials.find(element => element.id == req.params.id);
-  res.json(elementToReturn);
+  if (elementToReturn) {
+    res.json(elementToReturn);
+  } else {
+    res.status(404).json('No element with this id was found!')
+  }
 });
 
 // post requests
@@ -27,7 +31,7 @@ router.route('/testimonials').post((req, res) => {
     db.testimonials.push(newEntry);
     res.json({ message: 'OK', newEntry })
   } else {
-    res.json('Testimonial is not complete! Please try again!')
+    res.status(400).json('Testimonial is not complete! Please try again!')
   }
 })
 
@@ -41,7 +45,7 @@ router.route('/testimonials/:id').put((req, res) => {
     elementToChange.text = text;
     res.json({ message: 'OK' });
   } else {
-    res.json('No testimonial was changed! Try again.');
+    res.status(400).json('Bad request. No testimonial was changed! Try again.');
   };
 });
 
@@ -52,7 +56,7 @@ router.route('/testimonials/:id').delete((req, res) => {
     db.testimonials.splice(indexToRemove, 1); // modify the array in place
     res.json({ message: 'OK' });
   } else {
-    res.json('No element with this id was found!');
+    res.status(404).json('No element with this id was found!');
   }
 });
 

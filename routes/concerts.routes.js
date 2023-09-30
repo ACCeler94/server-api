@@ -11,7 +11,11 @@ router.route('/concerts').get((req, res) => {
 
 router.route('/concerts/:id').get((req, res) => {
   const elementToReturn = db.concerts.find(element => element.id == req.params.id);
-  res.json(elementToReturn);
+  if (elementToReturn) {
+    res.json(elementToReturn);
+  } else {
+    res.status(404).json('No element with this id was found!')
+  }
 });
 
 // post requests
@@ -23,7 +27,7 @@ router.route('/concerts').post((req, res) => {
     db.concerts.push(newEntry);
     res.json({ message: 'OK', newEntry })
   } else {
-    res.json('Concert data is not complete! Please try again!')
+    res.status(400).json('Concert data is not complete! Please try again!')
   }
 })
 
@@ -41,7 +45,7 @@ router.route('/concerts/:id').put((req, res) => {
 
     res.json({ message: 'OK' });
   } else {
-    res.json('No concert was changed! Try again.');
+    res.status(404).json('No element with this id was found!')
   };
 });
 
@@ -52,7 +56,7 @@ router.route('/concerts/:id').delete((req, res) => {
     db.concerts.splice(indexToRemove, 1); // modify the array in place
     res.json({ message: 'OK' });
   } else {
-    res.json('No element with this id was found!');
+    res.status(404).json('No element with this id was found!');
   }
 });
 

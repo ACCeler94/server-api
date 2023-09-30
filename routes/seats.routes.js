@@ -11,7 +11,11 @@ router.route('/seats').get((req, res) => {
 
 router.route('/seats/:id').get((req, res) => {
   const elementToReturn = db.seats.find(element => element.id == req.params.id);
-  res.json(elementToReturn);
+  if (elementToReturn) {
+    res.json(elementToReturn);
+  } else {
+    res.status(404).json('No element with this id was found!')
+  }
 });
 
 // post requests
@@ -23,7 +27,7 @@ router.route('/seats').post((req, res) => {
     db.seats.push(newEntry);
     res.json({ message: 'OK', newEntry })
   } else {
-    res.json('Seat data is not complete! Please try again!')
+    res.status(400).json('Seat data is not complete! Please try again!')
   }
 })
 
@@ -40,7 +44,7 @@ router.route('/seats/:id').put((req, res) => {
 
     res.json({ message: 'OK' });
   } else {
-    res.json('No seat was changed! Try again.');
+    res.status(404).json('No element with this id was found!');
   };
 });
 
