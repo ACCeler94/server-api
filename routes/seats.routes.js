@@ -23,7 +23,7 @@ router.route('/seats/:id').get((req, res) => {
 router.route('/seats').post((req, res) => {
   const { day, seat, client, email } = req.body;
 
-  if (!db.seats.some(element => element.day === day && element.seat === seat)) { // check if seat is free
+  if (!db.seats.some(element => element.day == day && element.seat == seat)) { // check if seat is free
     if (day && seat && client && email) {
       const newEntry = { id: uuidv4(), day, seat, client, email }
       db.seats.push(newEntry);
