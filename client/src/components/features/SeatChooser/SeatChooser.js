@@ -1,27 +1,32 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Button, Progress, Alert } from 'reactstrap';
-import { getSeats, loadSeatsRequest, getRequests } from '../../../redux/seatsRedux';
+import { getSeats, loadSeatsRequest, getRequests, loadSeats } from '../../../redux/seatsRedux';
 import './SeatChooser.scss';
+import io from 'socket.io-client';
 
 const SeatChooser = ({ chosenDay, chosenSeat, updateSeat }) => {
   const dispatch = useDispatch();
   const seats = useSelector(getSeats);
   const requests = useSelector(getRequests);
+  const [socket, setSocket] = useState();
+
 
   useEffect(() => {
     dispatch(loadSeatsRequest());
   }, [dispatch])
 
   useEffect(() => {
-    const checkForSeatsInterval = setInterval(() => {
-      dispatch(loadSeatsRequest());
-      console.log('seats checked')
-    }, 120000);
+    const socket = io(process.env.NODE_ENV === 'production' ? '' : 'ws://localhost:8000', { transports: ['websocket'] });
+    setSocket(socket);
 
-    return () => clearInterval(checkForSeatsInterval)
+    socket.on('seatsUpdated', seats => {
+      dispatch(loadSeats(seats))
+    });
 
-  }, [dispatch])
+    return () => socket.disconnect();
+  }, [])
+
 
 
   const isTaken = (seatId) => {
@@ -33,6 +38,7 @@ const SeatChooser = ({ chosenDay, chosenSeat, updateSeat }) => {
     else if (isTaken(seatId)) return <Button key={seatId} className="seats__seat" disabled color="secondary">{seatId}</Button>;
     else return <Button key={seatId} color="primary" className="seats__seat" outline onClick={(e) => updateSeat(e, seatId)}>{seatId}</Button>;
   }
+
 
   return (
     <div>

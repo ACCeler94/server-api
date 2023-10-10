@@ -27,7 +27,8 @@ router.route('/seats').post((req, res) => {
     if (day && seat && client && email) {
       const newEntry = { id: uuidv4(), day, seat, client, email }
       db.seats.push(newEntry);
-      res.json({ message: 'OK', newEntry })
+      res.json({ message: 'OK', newEntry });
+      req.io.emit('seatsUpdated', db.seats);
     } else {
       res.status(400).json('Seat data is not complete! Please try again!')
     }
