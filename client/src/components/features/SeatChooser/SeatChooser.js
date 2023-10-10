@@ -10,6 +10,9 @@ const SeatChooser = ({ chosenDay, chosenSeat, updateSeat }) => {
   const seats = useSelector(getSeats);
   const requests = useSelector(getRequests);
   const [socket, setSocket] = useState();
+  const [freeSeats, setFreeSeats] = useState();
+
+  const totalSeats = 50;
 
 
   useEffect(() => {
@@ -21,11 +24,21 @@ const SeatChooser = ({ chosenDay, chosenSeat, updateSeat }) => {
     setSocket(socket);
 
     socket.on('seatsUpdated', seats => {
-      dispatch(loadSeats(seats))
+      dispatch(loadSeats(seats));
     });
 
     return () => socket.disconnect();
   }, [])
+
+
+  useEffect(() => {
+    const calculateFreeSeats = () => {
+      const numberOfBooked = seats.filter(seat => seat.day === chosenDay).length
+      setFreeSeats(totalSeats - numberOfBooked);
+    };
+    calculateFreeSeats();
+  }, [seats, chosenDay])
+
 
 
 
@@ -50,6 +63,7 @@ const SeatChooser = ({ chosenDay, chosenSeat, updateSeat }) => {
       {(requests['LOAD_SEATS'] && requests['LOAD_SEATS'].success) && <div className="seats">{[...Array(50)].map((x, i) => prepareSeat(i + 1))}</div>}
       {(requests['LOAD_SEATS'] && requests['LOAD_SEATS'].pending) && <Progress animated color="primary" value={50} />}
       {(requests['LOAD_SEATS'] && requests['LOAD_SEATS'].error) && <Alert color="warning">Couldn't load seats...</Alert>}
+      <h4>Free seats:{freeSeats} / {totalSeats}</h4>
     </div>
   )
 }
