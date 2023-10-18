@@ -39,7 +39,7 @@ app.use((req, res) => {
 })
 
 // connects our backend code with the database
-mongoose.connect('mongodb://0.0.0.0:27017/newWaveFestival', { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect('mongodb+srv://artur94:mongoTest1234@cluster0.rczlaff.mongodb.net/newWaveFestival?retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true });
 const db = mongoose.connection;
 
 db.once('open', () => {
