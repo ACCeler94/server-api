@@ -1,67 +1,77 @@
 const express = require('express');
 const router = express.Router();
-const db = require('./../db/db');
-const { v4: uuidv4 } = require('uuid');
+const Seat = require('../models/seat.model')
 
 
 // get requests
-router.route('/seats').get((req, res) => {
-  res.json(db.seats)
+router.route('/seats').get(async (req, res) => {
+  try {
+    res.json(await Seat.find())
+  } catch (error) {
+    res.status(500).json({ message: error })
+  }
 });
 
 
-router.route('/seats/:id').get((req, res) => {
-  const elementToReturn = db.seats.find(element => element.id == req.params.id);
-  if (elementToReturn) {
-    res.json(elementToReturn);
-  } else {
-    res.status(404).json('No element with this id was found!')
+router.route('/seats/:id').get(async (req, res) => {
+  try {
+    const seatElem = await Seat.findById(req.params.id)
+    if (seatElem) {
+      res.json(seatElem);
+    } else {
+      res.status(404).json('No element with this id was found!')
+    }
+  } catch (error) {
+    res.status(500).json({ message: error })
   }
 });
 
 // post requests
-router.route('/seats').post((req, res) => {
+router.route('/seats').post(async (req, res) => {
   const { day, seat, client, email } = req.body;
-
-  if (!db.seats.some(element => element.day == day && element.seat == seat)) { // check if seat is free
-    if (day && seat && client && email) {
-      const newEntry = { id: uuidv4(), day, seat, client, email }
-      db.seats.push(newEntry);
-      res.json({ message: 'OK', newEntry });
-      req.io.emit('seatsUpdated', db.seats);
+  try {
+    const takenSeat = await Seat.findOne({ day, seat }); // check if there is already a seat elem with the same day and seat as request
+    if (!takenSeat) {
+      const newSeat = new Seat({ day, seat, client, email });
+      await newSeat.save();
+      res.json({ message: 'OK' })
     } else {
-      res.status(400).json('Seat data is not complete! Please try again!')
+      res.status(409).json({ message: "This seat is already taken..." })
     }
-  } else {
-    res.status(409).json({ message: "The slot is already taken..." })
+  } catch (error) {
+    res.status(500).json({ message: error })
   }
 })
 
 // put requests
-router.route('/seats/:id').put((req, res) => {
+router.route('/seats/:id').put(async (req, res) => {
   const { day, seat, client, email } = req.body;
-  const elementToChange = db.seats.find(element => element.id == req.params.id);
+  try {
+    const seatElem = await Seat.findById(req.params.id);
 
-  if (elementToChange) {
-    if (day) elementToChange.day = day;
-    if (seat) elementToChange.seat = seat;
-    if (client) elementToChange.client = client;
-    if (email) elementToChange.email = email;
-
-    res.json({ message: 'OK' });
-  } else {
-    res.status(404).json('No element with this id was found!');
-  };
+    if (seatElem) {
+      await Seat.updateOne({ _id: req.params.id }, { $set: { day, seat, client, email } });
+      res.json({ message: 'OK' });
+    } else {
+      res.status(404).json('No element with this id was found!');
+    };
+  } catch (error) {
+    res.status(500).json({ message: error });
+  }
 });
 
 // delete requests
-router.route('/seats/:id').delete((req, res) => {
-  const indexToRemove = db.seats.findIndex(element => element.id == req.params.id);
-  if (indexToRemove !== -1) {
-    db.seats.splice(indexToRemove, 1); // modify the array in place
-    res.json({ message: 'OK' });
-  } else {
-    res.status(404).json('No element with this id was found!');
+router.route('/seats/:id').delete(async (req, res) => {
+  try {
+    const seatElem = await Seat.findById(req.params.id)
+    if (seatElem) {
+      await Seat.deleteOne({ _id: req.params.id })
+      res.json({ message: 'OK' });
+    } else {
+      res.status(404).json('No element with this id was found!');
+    }
+  } catch (error) {
+    res.status(500).json({ message: error })
   }
 });
 
