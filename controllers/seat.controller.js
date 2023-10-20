@@ -29,6 +29,7 @@ exports.addSeat = async (req, res) => {
       const newSeat = new Seat({ day, seat, client, email });
       await newSeat.save();
       res.json({ message: 'OK' })
+      req.io.emit('seatsUpdated', await Seat.find());
     } else {
       res.status(409).json({ message: "This seat is already taken..." })
     }
@@ -45,6 +46,7 @@ exports.updateSeat = async (req, res) => {
     if (seatElem) {
       await Seat.updateOne({ _id: req.params.id }, { $set: { day, seat, client, email } });
       res.json({ message: 'OK' });
+      req.io.emit('seatsUpdated', await Seat.find());
     } else {
       res.status(404).json('No element with this id was found!');
     };
