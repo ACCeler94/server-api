@@ -38,9 +38,7 @@ app.use((req, res) => {
   res.status(404).send('404 not found...');
 })
 
-const dbURI = process.env.NODE_ENV === 'production'
-  ? `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.rczlaff.mongodb.net/newWaveFestival?retryWrites=true&w=majority'`
-  : 'mongodb://localhost:27017/newWaveFestival';
+const dbURI = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.rczlaff.mongodb.net/newWaveFestival?retryWrites=true&w=majority'`
 
 
 // connects our backend code with the database
