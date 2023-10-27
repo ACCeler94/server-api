@@ -4,6 +4,7 @@ const cors = require('cors');
 const path = require('path');
 const socket = require('socket.io');
 const mongoose = require('mongoose');
+const helmet = require('helmet');
 
 // import routes
 const testimonialsRoutes = require('./routes/testimonials.routes');
@@ -19,6 +20,7 @@ app.use((req, res, next) => {
 app.use(express.urlencoded({ extended: false })); // required to handle urlencode requests
 app.use(express.json()); // required to handle form-data request (optional in this project)
 app.use(cors()); // middleware to enable CORS requests
+app.use(helmet());
 app.use('/api', testimonialsRoutes); // add testimonials routes
 app.use('/api', seatsRoutes); // add seats routes
 app.use('/api', concertsRoutes); // add concerts routes
